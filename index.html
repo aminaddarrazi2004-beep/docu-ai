@@ -2,108 +2,156 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>DocuAI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Klaro – Jouw kantoor, op automatische piloot.</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a1a2e; }
-    header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 20px 40px; }
-    header h1 { font-size: 1.6rem; }
-    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-    .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-    .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
-    label { display: block; font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 5px; margin-top: 14px; text-transform: uppercase; }
-    input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
-    textarea { min-height: 80px; resize: vertical; }
-    .doc-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-    .doc-type-btn { padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; font-size: 0.85rem; font-weight: 600; background: white; color: #444; }
+    header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 20px 40px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p { font-size: 0.85rem; opacity: 0.6; margin-top: 2px; }
+    .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 18px; color: #1a1a2e; }
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: #666; margin-bottom: 5px; margin-top: 14px; text-transform: uppercase; letter-spacing: 0.4px; }
+    input, select, textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.93rem; font-family: inherit; transition: border 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #4f46e5; }
+    textarea { resize: vertical; min-height: 75px; }
+    .doc-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 5px; }
+    .doc-type-btn { padding: 11px 8px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; font-size: 0.78rem; font-weight: 600; background: white; color: #555; transition: all 0.2s; }
+    .doc-type-btn:hover { border-color: #4f46e5; color: #4f46e5; }
     .doc-type-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; }
-    .doc-type-btn .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-    .generate-btn { width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-    .generate-btn:disabled { opacity: 0.5; }
+    .doc-type-btn .icon { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+    .generate-btn { width: 100%; margin-top: 22px; padding: 13px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    .generate-btn:hover { opacity: 0.9; }
+    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .output-card { display: flex; flex-direction: column; }
-    .output-area { flex: 1; min-height: 420px; background: #f8fafc; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 20px; font-size: 0.93rem; line-height: 1.7; white-space: pre-wrap; }
-    .placeholder-text { color: #aaa; font-style: italic; }
-    .output-actions { display: flex; gap: 10px; margin-top: 14px; }
-    .action-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1.5px solid #4f46e5; color: #4f46e5; background: white; }
-    .action-btn:disabled { opacity: 0.4; }
-    .loading { display: flex; align-items: center; gap: 10px; color: #4f46e5; font-weight: 600; }
-    .spinner { width: 20px; height: 20px; border: 3px solid #eef2ff; border-top: 3px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .output-area { flex: 1; min-height: 450px; background: #f8fafc; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 18px; font-size: 0.91rem; line-height: 1.75; white-space: pre-wrap; color: #1a1a2e; }
+    .placeholder-text { color: #bbb; font-style: italic; }
+    .output-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .action-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 0.87rem; font-weight: 600; cursor: pointer; border: 1.5px solid #4f46e5; color: #4f46e5; background: white; transition: all 0.2s; }
+    .action-btn:hover { background: #eef2ff; }
+    .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .loading { display: flex; align-items: center; gap: 10px; color: #4f46e5; font-weight: 600; padding: 10px 0; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #eef2ff; border-top: 3px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @media(max-width: 720px) { .container { grid-template-columns: 1fr; } .doc-type-grid { grid-template-columns: 1fr 1fr; } }
   </style>
 </head>
 <body>
-<header><h1>📄 DocuAI — Document Generator voor Accountants</h1></header>
+<header>
+  <div style="font-size:1.8rem">📄</div>
+  <div>
+    <h1>Klaro <span style="background:#dcfce7;color:#16a34a;font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:6px">PROTOTYPE</span></h1>
+<p>Jouw kantoor, op automatische piloot.</p>
+  </div>
+</header>
+
 <div class="container">
   <div class="card">
-    <h2>✏️ Gegevens invullen</h2>
-    <label>Type document</label>
+    <h2>✏️ Vul de gegevens in</h2>
+
+    <label>Kies document type</label>
     <div class="doc-type-grid">
       <button class="doc-type-btn active" onclick="selectType(this,'offerte')"><span class="icon">💼</span>Offerte</button>
       <button class="doc-type-btn" onclick="selectType(this,'rapport')"><span class="icon">📊</span>Klantrapport</button>
       <button class="doc-type-btn" onclick="selectType(this,'bevestiging')"><span class="icon">✅</span>Opdrachtbevestiging</button>
       <button class="doc-type-btn" onclick="selectType(this,'herinnering')"><span class="icon">🔔</span>Betalingsherinnering</button>
+      <button class="doc-type-btn" onclick="selectType(this,'aanmaning')"><span class="icon">⚠️</span>Aanmaning</button>
+      <button class="doc-type-btn" onclick="selectType(this,'email')"><span class="icon">📧</span>Klantemail</button>
     </div>
+
     <label>Naam accountantskantoor</label>
-    <input type="text" id="kantoor" placeholder="bijv. Van der Berg & Partners" />
+    <input type="text" id="kantoor" placeholder="bijv. Full Account B.V." />
+
     <label>Naam klant / bedrijf</label>
-    <input type="text" id="klant" placeholder="bijv. Bakkerij De Wit B.V." />
+    <input type="text" id="klant" placeholder="bijv. Bakkerij De Wit" />
+
     <label>Extra informatie (optioneel)</label>
-    <textarea id="extra" placeholder="bijv. diensten, bedragen, periode..."></textarea>
-    <label>Toon</label>
+    <textarea id="extra" placeholder="bijv. diensten, bedragen, periode, onderwerp..."></textarea>
+
+    <label>Toon van het document</label>
     <select id="toon">
       <option value="formeel">Formeel & Professioneel</option>
       <option value="vriendelijk">Vriendelijk & Toegankelijk</option>
       <option value="zakelijk">Kort & Zakelijk</option>
     </select>
+
     <button class="generate-btn" id="genBtn" onclick="generateDoc()">✨ Document genereren</button>
   </div>
+
   <div class="card output-card">
-    <h2>📋 Gegenereerd document</h2>
-    <div class="output-area" id="output"><span class="placeholder-text">Vul de gegevens in en klik op "Document genereren"...</span></div>
+    <h2>📋 Jouw gegenereerde document</h2>
+    <div class="output-area" id="output">
+      <span class="placeholder-text">Vul links de gegevens in en klik op "Document genereren" — binnen enkele seconden staat hier een professioneel document klaar! 🚀</span>
+    </div>
     <div class="output-actions">
       <button class="action-btn" id="copyBtn" onclick="copyText()" disabled>📋 Kopiëren</button>
     </div>
   </div>
 </div>
+
 <script>
-  let selectedType = 'offerte', lastGenerated = '';
+  let selectedType = 'offerte';
+  let lastGenerated = '';
+
   function selectType(btn, type) {
     document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); selectedType = type;
+    btn.classList.add('active');
+    selectedType = type;
   }
+
   async function generateDoc() {
     const kantoor = document.getElementById('kantoor').value.trim() || 'Uw kantoor';
     const klant = document.getElementById('klant').value.trim() || 'De klant';
     const extra = document.getElementById('extra').value.trim();
     const toon = document.getElementById('toon').value;
-    const labels = { offerte:'offerte', rapport:'klantrapportage', bevestiging:'opdrachtbevestiging', herinnering:'betalingsherinnering' };
+    const labels = {
+      offerte: 'offerte',
+      rapport: 'klantrapportage',
+      bevestiging: 'opdrachtbevestiging',
+      herinnering: 'betalingsherinnering',
+      aanmaning: 'aanmaning (tweede en laatste herinnering, stevigere toon, met juridische consequenties als er niet betaald wordt)',
+      email: 'professionele klantemail'
+    };
+
     const btn = document.getElementById('genBtn');
     const output = document.getElementById('output');
     btn.disabled = true;
+    document.getElementById('copyBtn').disabled = true;
     output.innerHTML = '<div class="loading"><div class="spinner"></div> Document wordt gegenereerd...</div>';
-    const prompt = `Schrijf een professionele ${labels[selectedType]} in het Nederlands.\nAccountantskantoor: ${kantoor}\nKlant: ${klant}\nToon: ${toon}\n${extra ? 'Extra: '+extra : ''}\nMaak een volledig bruikbaar document met datum (${new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'})}), aanhef, inhoud en afsluiting. Alleen het document zelf, geen uitleg.`;
+
+    const datum = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const prompt = `Schrijf een professionele ${labels[selectedType]} in het Nederlands.
+Accountantskantoor: ${kantoor}
+Klant/bedrijf: ${klant}
+Toon: ${toon}
+Datum: ${datum}
+${extra ? `Extra informatie: ${extra}` : ''}
+
+Schrijf het volledige document met datum, aanhef, inhoud en professionele afsluiting. Gebruik de exacte namen. Geen lege plekken of placeholders. Geef alleen het document zelf terug.`;
+
     try {
-      const res = await fetch("/.netlify/functions/generate", {
+      const response = await fetch("/.netlify/functions/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt })
       });
-      const data = await res.json();
-      if (data.error) {
-        output.innerText = 'Fout: ' + data.error;
-      } else {
-        lastGenerated = data.result;
-        output.innerText = lastGenerated;
-        document.getElementById('copyBtn').disabled = false;
-      }
-    } catch(e) { output.innerText = 'Fout bij verbinding. Probeer opnieuw.'; }
+      const data = await response.json();
+      lastGenerated = data.result || data.error || 'Fout. Probeer opnieuw.';
+      output.innerText = lastGenerated;
+      document.getElementById('copyBtn').disabled = false;
+    } catch (e) {
+      output.innerText = '⚠️ Verbindingsfout. Probeer opnieuw.';
+    }
     btn.disabled = false;
   }
+
   function copyText() {
     navigator.clipboard.writeText(lastGenerated);
     const btn = document.getElementById('copyBtn');
     btn.innerText = '✅ Gekopieerd!';
-    setTimeout(()=>btn.innerText='📋 Kopiëren',2000);
+    setTimeout(() => btn.innerText = '📋 Kopiëren', 2000);
   }
 </script>
 </body>
