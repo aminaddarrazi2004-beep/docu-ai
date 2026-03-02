@@ -18,7 +18,26 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          {
+            role: "system",
+            content: `Je bent een professionele Nederlandse zakelijke schrijver die documenten maakt voor accountantskantoren. 
+
+STRIKTE REGELS:
+- Schrijf ALTIJD in correct Nederlands
+- Gebruik NOOIT placeholders zoals [Naam], [Adres], [in te vullen], [Handtekening] etc.
+- Gebruik de exacte namen die de gebruiker opgeeft
+- Datum staat altijd bovenaan
+- Voor offertes: gebruik altijd een duidelijke prijstabel
+- Houd documenten beknopt maar volledig — maximaal 1 A4
+- Sluit altijd af met de naam van het accountantskantoor en "Accountants & Adviseurs"
+- Geen handtekeningvelden of adresvelden die leeg zijn`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
         max_tokens: 1000
       })
     });
