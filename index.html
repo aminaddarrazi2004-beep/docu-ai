@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>DocuAI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a1a2e; }
+    header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 20px 40px; }
+    header h1 { font-size: 1.6rem; }
+    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 5px; margin-top: 14px; text-transform: uppercase; }
+    input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    .doc-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+    .doc-type-btn { padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; font-size: 0.85rem; font-weight: 600; background: white; color: #444; }
+    .doc-type-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; }
+    .doc-type-btn .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .generate-btn { width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .generate-btn:disabled { opacity: 0.5; }
+    .output-card { display: flex; flex-direction: column; }
+    .output-area { flex: 1; min-height: 420px; background: #f8fafc; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 20px; font-size: 0.93rem; line-height: 1.7; white-space: pre-wrap; }
+    .placeholder-text { color: #aaa; font-style: italic; }
+    .output-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .action-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1.5px solid #4f46e5; color: #4f46e5; background: white; }
+    .action-btn:disabled { opacity: 0.4; }
+    .loading { display: flex; align-items: center; gap: 10px; color: #4f46e5; font-weight: 600; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #eef2ff; border-top: 3px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<header><h1>📄 DocuAI — Document Generator voor Accountants</h1></header>
+<div class="container">
+  <div class="card">
+    <h2>✏️ Gegevens invullen</h2>
+    <label>Type document</label>
+    <div class="doc-type-grid">
+      <button class="doc-type-btn active" onclick="selectType(this,'offerte')"><span class="icon">💼</span>Offerte</button>
+      <button class="doc-type-btn" onclick="selectType(this,'rapport')"><span class="icon">📊</span>Klantrapport</button>
+      <button class="doc-type-btn" onclick="selectType(this,'bevestiging')"><span class="icon">✅</span>Opdrachtbevestiging</button>
+      <button class="doc-type-btn" onclick="selectType(this,'herinnering')"><span class="icon">🔔</span>Betalingsherinnering</button>
+    </div>
+    <label>Naam accountantskantoor</label>
+    <input type="text" id="kantoor" placeholder="bijv. Van der Berg & Partners" />
+    <label>Naam klant / bedrijf</label>
+    <input type="text" id="klant" placeholder="bijv. Bakkerij De Wit B.V." />
+    <label>Extra informatie (optioneel)</label>
+    <textarea id="extra" placeholder="bijv. diensten, bedragen, periode..."></textarea>
+    <label>Toon</label>
+    <select id="toon">
+      <option value="formeel">Formeel & Professioneel</option>
+      <option value="vriendelijk">Vriendelijk & Toegankelijk</option>
+      <option value="zakelijk">Kort & Zakelijk</option>
+    </select>
+    <button class="generate-btn" id="genBtn" onclick="generateDoc()">✨ Document genereren</button>
+  </div>
+  <div class="card output-card">
+    <h2>📋 Gegenereerd document</h2>
+    <div class="output-area" id="output"><span class="placeholder-text">Vul de gegevens in en klik op "Document genereren"...</span></div>
+    <div class="output-actions">
+      <button class="action-btn" id="copyBtn" onclick="copyText()" disabled>📋 Kopiëren</button>
+    </div>
+  </div>
+</div>
+<script>
+  let selectedType = 'offerte', lastGenerated = '';
+  function selectType(btn, type) {
+    document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); selectedType = type;
+  }
+  async function generateDoc() {
+    const kantoor = document.getElementById('kantoor').value.trim() || 'Uw kantoor';
+    const klant = document.getElementById('klant').value.trim() || 'De klant';
+    const extra = document.getElementById('extra').value.trim();
+    const toon = document.getElementById('toon').value;
+    const labels = { offerte:'offerte', rapport:'klantrapportage', bevestiging:'opdrachtbevestiging', herinnering:'betalingsherinnering' };
+    const btn = document.getElementById('genBtn');
+    const output = document.getElementById('output');
+    btn.disabled = true;
+    output.innerHTML = '<div class="loading"><div class="spinner"></div> Document wordt gegenereerd...</div>';
+    const prompt = `Schrijf een professionele ${labels[selectedType]} in het Nederlands.\nAccountantskantoor: ${kantoor}\nKlant: ${klant}\nToon: ${toon}\n${extra ? 'Extra: '+extra : ''}\nMaak een volledig bruikbaar document met datum (${new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'})}), aanhef, inhoud en afsluiting. Alleen het document zelf, geen uitleg.`;
+    try {
+      const res = await fetch("/.netlify/functions/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.error) {
+        output.innerText = 'Fout: ' + data.error;
+      } else {
+        lastGenerated = data.result;
+        output.innerText = lastGenerated;
+        document.getElementById('copyBtn').disabled = false;
+      }
+    } catch(e) { output.innerText = 'Fout bij verbinding. Probeer opnieuw.'; }
+    btn.disabled = false;
+  }
+  function copyText() {
+    navigator.clipboard.writeText(lastGenerated);
+    const btn = document.getElementById('copyBtn');
+    btn.innerText = '✅ Gekopieerd!';
+    setTimeout(()=>btn.innerText='📋 Kopiëren',2000);
+  }
+</script>
+</body>
+</html>
